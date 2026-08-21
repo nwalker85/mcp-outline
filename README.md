@@ -290,6 +290,7 @@ Then connect from client:
 - `move_document(document_id, collection_id?, parent_document_id?)` - Move document to different collection or parent
 
 ### Document Lifecycle
+- `publish_document(document_id, collection_id?)` - Publish a draft (collection_id required if the draft has no collection)
 - `archive_document(document_id)` - Archive document
 - `unarchive_document(document_id)` - Restore document from archive
 - `delete_document(document_id, permanent?)` - Delete document (or move to trash)

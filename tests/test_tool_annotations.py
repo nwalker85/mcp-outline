@@ -93,6 +93,7 @@ async def test_non_destructive_write_tools(fresh_mcp_server):
     # Define non-destructive write tools
     non_destructive_write_tools = [
         "create_document",
+        "publish_document",
         "add_comment",
         "create_collection",
         "unarchive_document",
@@ -134,6 +135,7 @@ async def test_idempotent_tools(fresh_mcp_server):
         "list_document_comments",
         "get_comment",
         "get_document_backlinks",
+        "publish_document",
         "unarchive_document",
         "restore_document",
         "list_archived_documents",

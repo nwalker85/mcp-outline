@@ -18,7 +18,7 @@ This MCP server bridges AI assistants with Outline's document management platfor
 - **Reading**: Read content, export markdown
 - **Content**: Create, update, comment
 - **Organization**: Move documents between collections
-- **Lifecycle**: Archive, delete, restore operations
+- **Lifecycle**: Publish, archive, delete, restore operations
 - **Collaboration**: Comments, backlinks
 - **Collections**: Create, update, delete, export
 - **AI**: Natural language queries

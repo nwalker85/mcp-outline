@@ -1,11 +1,12 @@
 """
 Document lifecycle management for the MCP Outline server.
 
-This module provides MCP tools for archiving, trashing, and restoring
-documents.
+This module provides MCP tools for publishing, archiving, trashing,
+and restoring documents.
 """
 
 import os
+from typing import Any, Dict, Optional
 
 from mcp.types import ToolAnnotations
 
@@ -27,6 +28,69 @@ def register_tools(mcp) -> None:
         "1",
         "yes",
     )
+
+    @mcp.tool(
+        annotations=ToolAnnotations(
+            readOnlyHint=False,
+            destructiveHint=False,
+            idempotentHint=True,
+        )
+    )
+    async def publish_document(
+        document_id: str,
+        collection_id: Optional[str] = None,
+    ) -> str:
+        """
+        Publishes a draft document so it is visible in its collection.
+
+        Use this tool when you need to:
+        - Publish a document that was created with publish=False
+        - Promote a draft to published after review or editing
+        - Make an existing draft visible in collection navigation
+
+        This tool only publishes. It does not unpublish, rewrite
+        content, or change the title. Outline requires collection_id
+        when the draft is not already in a collection.
+
+        Args:
+            document_id: The document ID to publish
+            collection_id: Required when the draft has no collection.
+                Optional otherwise.
+
+        Returns:
+            Result message confirming publish
+        """
+        try:
+            client = await get_outline_client()
+
+            data: Dict[str, Any] = {
+                "id": document_id,
+                "publish": True,
+            }
+            if collection_id:
+                data["collectionId"] = collection_id
+
+            response = await client.post("documents.update", data)
+            document = response.get("data", {})
+
+            if not document:
+                return "Failed to publish document."
+
+            doc_title = document.get("title", "Untitled")
+            doc_id = document.get("id", document_id)
+            published_at = document.get("publishedAt")
+            if published_at:
+                return (
+                    f"Document published successfully: {doc_title} "
+                    f"(ID: {doc_id}, publishedAt: {published_at})"
+                )
+            return (
+                f"Document published successfully: {doc_title} (ID: {doc_id})"
+            )
+        except OutlineClientError as e:
+            return f"Error publishing document: {str(e)}"
+        except Exception as e:
+            return f"Unexpected error: {str(e)}"
 
     @mcp.tool(
         annotations=ToolAnnotations(

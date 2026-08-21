@@ -493,6 +493,131 @@ class TestListTrash:
         assert "API error" in result
 
 
+SAMPLE_PUBLISH_RESPONSE = {
+    "data": {
+        "id": "doc123",
+        "title": "Test Document",
+        "publishedAt": "2023-01-02T12:00:00Z",
+    }
+}
+
+
+class TestPublishDocument:
+    """Tests for publish_document tool."""
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_lifecycle.get_outline_client"
+    )
+    async def test_publish_document_success(
+        self, mock_get_client, register_lifecycle_tools
+    ):
+        """Test publish_document posts documents.update with publish=True."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_PUBLISH_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        result = await register_lifecycle_tools.tools["publish_document"](
+            "doc123"
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {"id": "doc123", "publish": True},
+        )
+        assert "Document published successfully" in result
+        assert "Test Document" in result
+        assert "doc123" in result
+        assert "2023-01-02T12:00:00Z" in result
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_lifecycle.get_outline_client"
+    )
+    async def test_publish_document_with_collection_id(
+        self, mock_get_client, register_lifecycle_tools
+    ):
+        """Test collection_id is sent when the draft has no collection."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_PUBLISH_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        _ = await register_lifecycle_tools.tools["publish_document"](
+            "doc123",
+            collection_id="col123",
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {
+                "id": "doc123",
+                "publish": True,
+                "collectionId": "col123",
+            },
+        )
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_lifecycle.get_outline_client"
+    )
+    async def test_publish_document_no_document_returned(
+        self, mock_get_client, register_lifecycle_tools
+    ):
+        """Test publish_document when the API returns no document."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = {"data": None}
+        mock_get_client.return_value = mock_client
+
+        result = await register_lifecycle_tools.tools["publish_document"](
+            "doc123"
+        )
+
+        assert "Failed to publish document" in result
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_lifecycle.get_outline_client"
+    )
+    async def test_publish_document_client_error(
+        self, mock_get_client, register_lifecycle_tools
+    ):
+        """Test publish_document with client error."""
+        mock_client = AsyncMock()
+        mock_client.post.side_effect = OutlineClientError("API error")
+        mock_get_client.return_value = mock_client
+
+        result = await register_lifecycle_tools.tools["publish_document"](
+            "doc123"
+        )
+
+        assert "Error publishing document" in result
+        assert "API error" in result
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_lifecycle.get_outline_client"
+    )
+    async def test_publish_document_without_published_at(
+        self, mock_get_client, register_lifecycle_tools
+    ):
+        """Test success message when publishedAt is absent."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = {
+            "data": {"id": "doc123", "title": "Test Document"}
+        }
+        mock_get_client.return_value = mock_client
+
+        result = await register_lifecycle_tools.tools["publish_document"](
+            "doc123"
+        )
+
+        assert (
+            "Document published successfully: Test Document (ID: doc123)"
+            in result
+        )
+        assert "publishedAt" not in result
+
+
 class TestConditionalRegistration:
     """Tests for conditional tool registration based on env vars."""
 
@@ -514,6 +639,7 @@ class TestConditionalRegistration:
         document_lifecycle.register_tools(mock_mcp)
 
         assert "delete_document" in mock_mcp.tools
+        assert "publish_document" in mock_mcp.tools
         assert "archive_document" in mock_mcp.tools
         assert "unarchive_document" in mock_mcp.tools
         assert "restore_document" in mock_mcp.tools
@@ -538,6 +664,7 @@ class TestConditionalRegistration:
         document_lifecycle.register_tools(mock_mcp)
 
         assert "delete_document" not in mock_mcp.tools
+        assert "publish_document" in mock_mcp.tools
         assert "archive_document" in mock_mcp.tools
         assert "unarchive_document" in mock_mcp.tools
         assert "restore_document" in mock_mcp.tools
