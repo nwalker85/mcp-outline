@@ -286,11 +286,10 @@ Then connect from client:
 
 ### Document Management
 - `create_document(title, collection_id, text?, parent_document_id?, publish?)` - Create new document
-- `update_document(document_id, title?, text?, append?)` - Update document (append mode available)
+- `update_document(document_id, title?, text?, append?, publish?, collection_id?)` - Update document (append mode and publish/unpublish available)
 - `move_document(document_id, collection_id?, parent_document_id?)` - Move document to different collection or parent
 
 ### Document Lifecycle
-- `publish_document(document_id, collection_id?)` - Publish a draft (collection_id required if the draft has no collection)
 - `archive_document(document_id)` - Archive document
 - `unarchive_document(document_id)` - Restore document from archive
 - `delete_document(document_id, permanent?)` - Delete document (or move to trash)

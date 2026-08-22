@@ -63,7 +63,6 @@ async def test_read_only_mode_disables_write_tools(fresh_mcp_server):
         # Verify write tools are NOT registered
         assert "create_document" not in tool_names
         assert "update_document" not in tool_names
-        assert "publish_document" not in tool_names
         assert "archive_document" not in tool_names
         assert "delete_document" not in tool_names
         assert "move_document" not in tool_names
@@ -110,7 +109,6 @@ async def test_disable_delete_blocks_deletes_only(fresh_mcp_server):
         # Verify other write tools ARE registered
         assert "create_document" in tool_names
         assert "update_document" in tool_names
-        assert "publish_document" in tool_names
         assert "archive_document" in tool_names
         assert "create_collection" in tool_names
         assert "update_collection" in tool_names
@@ -131,7 +129,6 @@ async def test_both_flags_together(fresh_mcp_server):
         # Verify write tools are NOT registered
         assert "create_document" not in tool_names
         assert "update_document" not in tool_names
-        assert "publish_document" not in tool_names
         assert "archive_document" not in tool_names
         assert "delete_document" not in tool_names
         assert "move_document" not in tool_names

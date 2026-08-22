@@ -244,6 +244,100 @@ class TestDocumentContentTools:
     @patch(
         "mcp_outline.features.documents.document_content.get_outline_client"
     )
+    async def test_update_document_publish_true(
+        self, mock_get_client, register_content_tools
+    ):
+        """Test update_document sends publish=True."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_UPDATE_DOCUMENT_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        result = await register_content_tools.tools["update_document"](
+            document_id="doc123",
+            publish=True,
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {"id": "doc123", "publish": True},
+        )
+        assert "Document updated successfully" in result
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_content.get_outline_client"
+    )
+    async def test_update_document_publish_false(
+        self, mock_get_client, register_content_tools
+    ):
+        """Test update_document sends publish=False to unpublish."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_UPDATE_DOCUMENT_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        _ = await register_content_tools.tools["update_document"](
+            document_id="doc123",
+            publish=False,
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {"id": "doc123", "publish": False},
+        )
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_content.get_outline_client"
+    )
+    async def test_update_document_publish_not_sent_when_none(
+        self, mock_get_client, register_content_tools
+    ):
+        """Test publish is omitted when not specified."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_UPDATE_DOCUMENT_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        _ = await register_content_tools.tools["update_document"](
+            document_id="doc123",
+            title="Updated Title",
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {"id": "doc123", "title": "Updated Title"},
+        )
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_content.get_outline_client"
+    )
+    async def test_update_document_publish_with_collection_id(
+        self, mock_get_client, register_content_tools
+    ):
+        """Test collection_id is sent when publishing a draft."""
+        mock_client = AsyncMock()
+        mock_client.post.return_value = SAMPLE_UPDATE_DOCUMENT_RESPONSE
+        mock_get_client.return_value = mock_client
+
+        _ = await register_content_tools.tools["update_document"](
+            document_id="doc123",
+            publish=True,
+            collection_id="col123",
+        )
+
+        mock_client.post.assert_called_once_with(
+            "documents.update",
+            {
+                "id": "doc123",
+                "publish": True,
+                "collectionId": "col123",
+            },
+        )
+
+    @pytest.mark.asyncio
+    @patch(
+        "mcp_outline.features.documents.document_content.get_outline_client"
+    )
     async def test_add_comment_success(
         self, mock_get_client, register_content_tools
     ):
