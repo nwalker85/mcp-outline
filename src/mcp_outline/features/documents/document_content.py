@@ -99,6 +99,8 @@ def register_tools(mcp) -> None:
         title: Optional[str] = None,
         text: Optional[str] = None,
         append: bool = False,
+        publish: Optional[bool] = None,
+        collection_id: Optional[str] = None,
     ) -> str:
         """
         Modifies an existing document's title or content.
@@ -114,6 +116,8 @@ def register_tools(mcp) -> None:
         - Change a document's title
         - Append new content to an existing document
         - Fix errors or add information to documents
+        - Publish a draft (publish=True) or unpublish
+          (publish=False)
 
         Note: For Mermaid diagrams, use ```mermaidjs (not ```mermaid)
         as the code fence language identifier for proper rendering.
@@ -124,6 +128,12 @@ def register_tools(mcp) -> None:
             text: New content (if None, keeps existing content)
             append: If True, adds text to the end of document
                 instead of replacing
+            publish: If True, publishes a draft. If False,
+                converts a published document back to a draft.
+                If None, leaves publication state unchanged.
+            collection_id: Required by Outline when publishing
+                a draft that has no collection. Optional
+                otherwise.
 
         Returns:
             Result message confirming update
@@ -140,6 +150,12 @@ def register_tools(mcp) -> None:
             if text is not None:
                 data["text"] = text
                 data["append"] = append
+
+            if publish is not None:
+                data["publish"] = publish
+
+            if collection_id is not None:
+                data["collectionId"] = collection_id
 
             response = await client.post("documents.update", data)
             document = response.get("data", {})

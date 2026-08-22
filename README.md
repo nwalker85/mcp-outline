@@ -286,7 +286,7 @@ Then connect from client:
 
 ### Document Management
 - `create_document(title, collection_id, text?, parent_document_id?, publish?)` - Create new document
-- `update_document(document_id, title?, text?, append?)` - Update document (append mode available)
+- `update_document(document_id, title?, text?, append?, publish?, collection_id?)` - Update document (append mode and publish/unpublish available)
 - `move_document(document_id, collection_id?, parent_document_id?)` - Move document to different collection or parent
 
 ### Document Lifecycle
